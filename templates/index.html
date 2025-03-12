@@ -1,25 +1,430 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Voice of the Streets</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice of the Streets - Sri Lanka</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <h1>Voice of the Streets</h1>
-    <div class="chat-container">
-        <div class="chat-messages">
-            {% if messages %}
-                {% for msg in messages %}
-                    <div class="message {{ 'user-message' if msg.is_user else 'bot-message' }}">
-                        {{ msg.text }}
-                    </div>
-                {% endfor %}
-            {% endif %}
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-bullhorn"></i> Voice of the Streets</h1>
+            <p class="tagline">Amplifying community concerns in Sri Lanka</p>
         </div>
-        <form method="POST" action="/">
-            <input type="text" name="message" placeholder="Type your message..." required>
-            <button type="submit">Send</button>
-        </form>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-layout">
+            <!-- Left sidebar with issue lists -->
+            <aside class="sidebar">
+                <div class="urgent-issues-panel">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Urgent Issues</h2>
+                    <div class="issues-list urgent">
+                        {% if urgent_issues %}
+                            {% for issue in urgent_issues %}
+                                <div class="issue-card">
+                                    <div class="issue-header">
+                                        <span class="issue-id">#{{ issue.id }}</span>
+                                        <span class="votes"><i class="fas fa-users"></i> {{ issue.vote_count }}</span>
+                                    </div>
+                                    <p class="issue-desc">{{ issue.description|truncate(60) }}</p>
+                                    <div class="issue-footer">
+                                        <span class="location"><i class="fas fa-map-marker-alt"></i> {{ issue.location or "Unknown" }}</span>
+                                        <span class="category">{{ issue.category }}</span>
+                                    </div>
+                                    <div class="issue-actions">
+                                        <button class="upvote-btn" data-id="{{ issue.id }}"><i class="fas fa-arrow-up"></i> Upvote</button>
+                                        <button class="update-btn" data-id="{{ issue.id }}"><i class="fas fa-info-circle"></i> Updates</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-issues">No urgent issues currently!</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="recent-issues-panel">
+                    <h2><i class="fas fa-clock"></i> Recent Issues</h2>
+                    <div class="issues-list recent">
+                        {% if recent_issues %}
+                            {% for issue in recent_issues %}
+                                <div class="issue-card">
+                                    <div class="issue-header">
+                                        <span class="issue-id">#{{ issue.id }}</span>
+                                        <span class="votes"><i class="fas fa-users"></i> {{ issue.vote_count }}</span>
+                                    </div>
+                                    <p class="issue-desc">{{ issue.description|truncate(60) }}</p>
+                                    <div class="issue-footer">
+                                        <span class="location"><i class="fas fa-map-marker-alt"></i> {{ issue.location or "Unknown" }}</span>
+                                        <span class="category">{{ issue.category }}</span>
+                                    </div>
+                                    <div class="issue-actions">
+                                        <button class="upvote-btn" data-id="{{ issue.id }}"><i class="fas fa-arrow-up"></i> Upvote</button>
+                                        <button class="update-btn" data-id="{{ issue.id }}"><i class="fas fa-info-circle"></i> Updates</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-issues">No issues reported yet!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main chat interface -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2><i class="fas fa-comment-alt"></i> Community Chat</h2>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome-message">
+                        <h3>Welcome to Voice of the Streets!</h3>
+                        <p>Report community issues, upvote existing ones, or check for updates.</p>
+                        <div class="example-prompts">
+                            <p>Try saying:</p>
+                            <ul>
+                                <li>"The road in Colombo near Hospital Road is damaged"</li>
+                                <li>"There's a water shortage in Kandy"</li>
+                                <li>"upvote #123"</li>
+                                <li>"update #123"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for msg in messages %}
+                            <div class="message {{ 'user-message' if msg.is_user else 'bot-message' }}">
+                                <div class="message-bubble">
+                                    {{ msg.text }}
+                                </div>
+                                <div class="message-sender">
+                                    {{ 'You' if msg.is_user else 'Voice of the Streets' }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="chat-input">
+                    <form id="message-form" class="message-form">
+                        <input type="text" id="message-input" name="message" placeholder="Describe an issue or type a command..." required>
+                        <button type="submit" id="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right sidebar with information -->
+            <aside class="info-sidebar">
+                <div class="about-panel">
+                    <h2><i class="fas fa-info-circle"></i> About</h2>
+                    <p>Voice of the Streets helps Sri Lankan communities report and track local issues. We use AI to understand and categorize problems, making it easier for authorities to respond.</p>
+                </div>
+                
+                <div class="help-panel">
+                    <h2><i class="fas fa-question-circle"></i> How It Works</h2>
+                    <div class="help-steps">
+                        <div class="help-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Report an Issue</h3>
+                                <p>Describe the problem in your own words</p>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Upvote Issues</h3>
+                                <p>Help prioritize community concerns</p>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Track Updates</h3>
+                                <p>Follow progress on reported issues</p>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Donate</h3>
+                                <p>Support solutions through community funding</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-panel">
+                    <h2><i class="fas fa-chart-bar"></i> Stats</h2>
+                    <div class="stat-item">
+                        <span class="stat-label">Issues Reported</span>
+                        <span class="stat-value" id="issues-count">{{ recent_issues|length }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Urgent Issues</span>
+                        <span class="stat-value" id="urgent-count">{{ urgent_issues|length }}</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Voice of the Streets | Empowering Sri Lankan Communities</p>
+        </div>
+    </footer>
+
+    <!-- Success modal -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>Success!</h2>
+            </div>
+            <div class="modal-body" id="modal-message">
+                Your issue has been recorded.
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const chatMessages = document.getElementById('chat-messages');
+            const modal = document.getElementById('success-modal');
+            const closeBtn = document.querySelector('.close-btn');
+            const modalMessage = document.getElementById('modal-message');
+            
+            // Scroll to bottom of messages
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Initial scroll
+            scrollToBottom();
+            
+            // Handle form submission
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to UI
+                addMessage(message, true);
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Send to server
+                fetch('/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Add bot response to UI
+                    addMessage(data.response, false);
+                    
+                    // Check if new issue was created
+                    if (data.issue_data && data.issue_data.is_new_issue) {
+                        showSuccessModal(`Your issue #${data.issue_data.issue_id} has been recorded. Thank you for your report!`);
+                        // Refresh issues lists
+                        refreshIssues();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addMessage('Sorry, there was an error processing your message.', false);
+                });
+            });
+            
+            // Add message to UI
+            function addMessage(text, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble';
+                bubbleDiv.textContent = text;
+                
+                const senderDiv = document.createElement('div');
+                senderDiv.className = 'message-sender';
+                senderDiv.textContent = isUser ? 'You' : 'Voice of the Streets';
+                
+                messageDiv.appendChild(bubbleDiv);
+                messageDiv.appendChild(senderDiv);
+                
+                chatMessages.appendChild(messageDiv);
+                scrollToBottom();
+            }
+            
+            // Handle upvote button clicks
+            document.querySelectorAll('.upvote-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const issueId = this.getAttribute('data-id');
+                    
+                    fetch(`/upvote/${issueId}`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            addMessage(`Upvoted issue #${issueId}`, true);
+                            addMessage(data.message, false);
+                            refreshIssues();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+            
+            // Handle update button clicks
+            document.querySelectorAll('.update-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const issueId = this.getAttribute('data-id');
+                    
+                    fetch(`/update/${issueId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            addMessage(`Checking updates for issue #${issueId}`, true);
+                            addMessage(data.message, false);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+            
+            // Show success modal
+            function showSuccessModal(message) {
+                modalMessage.textContent = message;
+                modal.style.display = 'flex';
+            }
+            
+            // Close modal on X click
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Refresh issues lists
+            function refreshIssues() {
+                // Refresh recent issues
+                fetch('/recent')
+                .then(response => response.json())
+                .then(data => {
+                    // Update UI with new issues
+                    updateIssuesList('.issues-list.recent', data.issues);
+                    document.getElementById('issues-count').textContent = data.issues.length;
+                });
+                
+                // Refresh urgent issues
+                fetch('/urgent')
+                .then(response => response.json())
+                .then(data => {
+                    // Update UI with new issues
+                    updateIssuesList('.issues-list.urgent', data.issues);
+                    document.getElementById('urgent-count').textContent = data.issues.length;
+                });
+            }
+            
+            // Update issues list in UI
+            function updateIssuesList(selector, issues) {
+                const container = document.querySelector(selector);
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                if (issues.length === 0) {
+                    const noIssues = document.createElement('p');
+                    noIssues.className = 'no-issues';
+                    noIssues.textContent = 'No issues found!';
+                    container.appendChild(noIssues);
+                    return;
+                }
+                
+                // Add new issue cards
+                issues.forEach(issue => {
+                    const card = document.createElement('div');
+                    card.className = 'issue-card';
+                    
+                    card.innerHTML = `
+                        <div class="issue-header">
+                            <span class="issue-id">#${issue.id}</span>
+                            <span class="votes"><i class="fas fa-users"></i> ${issue.vote_count}</span>
+                        </div>
+                        <p class="issue-desc">${issue.description.length > 60 ? issue.description.substring(0, 60) + '...' : issue.description}</p>
+                        <div class="issue-footer">
+                            <span class="location"><i class="fas fa-map-marker-alt"></i> ${issue.location || 'Unknown'}</span>
+                            <span class="category">${issue.category}</span>
+                        </div>
+                        <div class="issue-actions">
+                            <button class="upvote-btn" data-id="${issue.id}"><i class="fas fa-arrow-up"></i> Upvote</button>
+                            <button class="update-btn" data-id="${issue.id}"><i class="fas fa-info-circle"></i> Updates</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+                
+                // Re-attach event listeners
+                document.querySelectorAll('.upvote-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const issueId = this.getAttribute('data-id');
+                        
+                        fetch(`/upvote/${issueId}`, {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                addMessage(`Upvoted issue #${issueId}`, true);
+                                addMessage(data.message, false);
+                                refreshIssues();
+                            }
+                        });
+                    });
+                });
+                
+                document.querySelectorAll('.update-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const issueId = this.getAttribute('data-id');
+                        
+                        fetch(`/update/${issueId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                addMessage(`Checking updates for issue #${issueId}`, true);
+                                addMessage(data.message, false);
+                            }
+                        });
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
