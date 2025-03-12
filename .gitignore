@@ -1,0 +1,45 @@
+# Python Virtual Environment
+venv/
+env/
+*.venv
+
+# Python Bytecode and Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment Variables
+.env
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary Files
+*.tmp
+*.bak
+*.swp
+
+# Dependency Directories
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Render/Gunicorn Artifacts (if any)
+*.pid
