@@ -6,12 +6,20 @@
 </head>
 <body>
     <h1>Voice of the Streets</h1>
-    <form method="POST">
-        <input type="text" name="message" placeholder="Type your message..." required>
-        <button type="submit">Send</button>
-    </form>
-    {% if response %}
-        <p>{{ response }}</p>
-    {% endif %}
+    <div class="chat-container">
+        <div class="chat-messages">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="message {{ 'user-message' if msg.is_user else 'bot-message' }}">
+                        {{ msg.text }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <form method="POST" action="/">
+            <input type="text" name="message" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
 </body>
 </html>

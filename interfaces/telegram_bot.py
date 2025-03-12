@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def start(update, context):
-    update.message.reply_text("Welcome to Voice of the Streets! Report issues like 'Power outage in Colombo'.")
+    update.message.reply_text("Hey there! I’m Voice of the Streets, here to help with community issues in Sri Lanka. Report something (e.g., 'Power outage in Colombo'), ask for updates, or just chat with me!")
 
 def handle_message(update, context):
     message = update.message.text
