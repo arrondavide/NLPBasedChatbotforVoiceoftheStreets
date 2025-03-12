@@ -82,7 +82,7 @@ nest-asyncio==1.6.0
 networkx==3.4.2
 nltk==3.9.1
 notebook_shim==0.2.4
-numpy>=1.23.0
+numpy==2.2.3
 nvidia-cublas-cu12==12.4.5.8
 nvidia-cuda-cupti-cu12==12.4.127
 nvidia-cuda-nvrtc-cu12==12.4.127
@@ -103,6 +103,7 @@ pandocfilters==1.5.1
 parso==0.8.4
 pexpect==4.9.0
 pillow==11.0.0
+pipdeptree==2.25.1
 platformdirs==4.3.6
 plotly==5.24.1
 postgrest==0.19.3
@@ -152,7 +153,7 @@ terminado==0.18.1
 threadpoolctl==3.5.0
 tinycss2==1.4.0
 tokenizers==0.21.0
-torch==2.5.1
+torch==2.5.1+cpu
 tornado==6.4.2
 tqdm==4.67.1
 traitlets==5.14.3
