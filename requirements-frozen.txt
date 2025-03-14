@@ -82,7 +82,7 @@ nest-asyncio==1.6.0
 networkx==3.4.2
 nltk==3.9.1
 notebook_shim==0.2.4
-numpy>=1.23.0
+numpy==2.2.3
 nvidia-cublas-cu12==12.4.5.8
 nvidia-cuda-cupti-cu12==12.4.127
 nvidia-cuda-nvrtc-cu12==12.4.127
